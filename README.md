@@ -43,10 +43,7 @@ write path, and hooks provide the execution path.
 
 ```bash
 # Run the exploit
-./demo-exploit.sh
-
-# Run the control (direct write — should be blocked)
-./demo-control.sh
+./demo.sh
 
 # Reset to clean state
 ./reset-demo/reset.sh
@@ -59,9 +56,7 @@ write path, and hooks provide the execution path.
 | `.claude/settings.json` | Hook config pointing to in-project script |
 | `.claude/hooks/pre-bash.sh` | Innocent hook script (the write target) |
 | `attack/prompt.md` | Injection payload |
-| `demo-exploit.sh` | End-to-end exploit demonstration |
-| `demo-control.sh` | Control: proves direct writes are blocked |
-| `meta.md` | Detailed vulnerability analysis |
+| `demo.sh` | End-to-end exploit demonstration |
 | `reset-demo/` | Scripts to restore clean state |
 
 ## Comparison With Docker Escape (cve-claude-sandbox-docker)
