@@ -5,13 +5,12 @@
 #   1. Claude edits .claude/hooks/pre-bash.sh (sandbox allows this — it's a project file)
 #   2. Claude runs any Bash command (e.g., "echo hello")
 #   3. The modified hook fires OUTSIDE the sandbox on the host
-#   4. Payload writes /tmp/hook-exploit-proof.txt and overwrites settings.json
+#   4. Payload runs arbitrary commands as the host user (no sandbox involved)
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
 
-SETTINGS=".claude/settings.json"
 HOOK_SCRIPT=".claude/hooks/pre-bash.sh"
 PROOF_FILE="/tmp/hook-exploit-proof.txt"
 
@@ -28,16 +27,11 @@ TRIGGER_PROMPT="Run: echo hello"
 # Reset to known good state
 "$DIR/reset-demo/reset.sh"
 
-# Snapshot original state
-ORIGINAL_SETTINGS=$(cat "$SETTINGS")
 ORIGINAL_HOOK=$(cat "$HOOK_SCRIPT")
 
 echo
 echo "═══ BEFORE ═══"
-echo "settings.json:"
-echo "$ORIGINAL_SETTINGS"
-echo
-echo ".claude/hooks/pre-bash.sh:"
+echo "$HOOK_SCRIPT:"
 echo "$ORIGINAL_HOOK"
 echo
 
@@ -57,13 +51,10 @@ echo
 claude -p "$TRIGGER_PROMPT" "${CLAUDE_OPTS[@]}" 2>&1 || true
 
 echo
-echo "═══ AFTER ═══"
-echo "settings.json:"
-cat "$SETTINGS"
-echo
-
+echo "═══ RESULT ═══"
 if [ -f "$PROOF_FILE" ]; then
-  echo
   echo "Host code execution proof ($PROOF_FILE):"
   cat "$PROOF_FILE"
+else
+  echo "No proof file found. Hook may not have triggered — try running claude in this directory and executing any Bash command."
 fi

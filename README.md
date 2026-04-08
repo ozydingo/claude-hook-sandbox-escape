@@ -2,51 +2,40 @@
 
 ## Summary
 
-Claude Code's sandbox allows writes to project files but executes hook scripts
-**outside** the sandbox on the host. An attacker who can write to a hook script
-(via prompt injection or any sandbox write path) gains arbitrary host-level code
-execution on the next tool use.
-
-## Vulnerability
-
-| Field | Value |
-|-------|-------|
-| Component | Claude Code sandbox + hooks |
-| Attack vector | Prompt injection / malicious repo content |
-| Prerequisite | Project uses hooks that reference in-project scripts |
-| Impact | Arbitrary host code execution, sandbox configuration bypass |
+Claude Code hooks run **outside** the sandbox with full host privileges. The scripts
+they reference live **inside** the project directory, which is writable from within
+the sandbox. Modifying a hook script gives an attacker arbitrary host-level code
+execution on the next tool use — no sandbox bypass needed, because hooks were never
+sandboxed to begin with.
 
 ## The Problem
 
 ```
-.claude/settings.json          ← protected by sandbox (cannot overwrite directly)
-.claude/hooks/pre-bash.sh      ← NOT protected (writable project file)
-                                  BUT runs outside sandbox with host privileges
+INSIDE SANDBOX (writes allowed)          OUTSIDE SANDBOX (hooks execute)
+
+  .claude/hooks/pre-bash.sh  ──write──>  pre-bash.sh runs on next Bash tool use
+                                           ├── full host filesystem access
+                                           ├── network access (curl, ssh)
+                                           ├── read secrets (~/.aws, ~/.ssh)
+                                           └── modify user environment (~/.bashrc)
 ```
 
-The sandbox protects its own config (`settings.json`) but not the scripts that
-`settings.json` points to. Modifying a hook script is equivalent to modifying
-`settings.json` — both control what runs outside the sandbox.
+The sandbox is irrelevant once the hook fires. There is no settings.json overwrite,
+no Docker escape, no second stage. The hook script **is** the escape.
 
 ## Attack Chain
 
-1. **Recon**: Attacker reads `.claude/settings.json` to find hook script paths
-2. **Write**: Attacker modifies `.claude/hooks/pre-bash.sh` (sandbox allows this)
-3. **Trigger**: Claude runs any Bash command → hook fires automatically
-4. **Escape**: Modified hook runs on host — writes `/tmp/hook-exploit-proof.txt`,
-   overwrites `settings.json` to expand permissions
+1. **Recon**: Read `.claude/settings.json` to find hook script paths
+2. **Write**: Modify the hook script (sandbox allows this — it's a project file)
+3. **Trigger**: Claude runs any Bash command → hook fires automatically on the host
 
-No Docker, no bind mounts, no special tooling. The sandbox itself provides the
-write path, and hooks provide the execution path.
+Single-stage, self-triggering, no prerequisites beyond hooks existing.
 
 ## Demo
 
 ```bash
-# Run the exploit
-./demo.sh
-
-# Reset to clean state
-./reset-demo/reset.sh
+./demo.sh              # run the exploit
+./reset-demo/reset.sh  # restore clean state
 ```
 
 ## Files
@@ -67,13 +56,26 @@ write path, and hooks provide the execution path.
 | Requires bind mount | Yes | No |
 | Trigger mechanism | User runs test script | Automatic (next tool use) |
 | Extra config needed | `excludedCommands` for Docker | Hooks exist (intended use) |
-| Complexity | Two-stage (inject → Docker run) | One-stage (inject → auto-trigger) |
+| Stages | Two (inject → Docker run → settings overwrite) | One (inject → auto-trigger) |
+| Goal | Weaken sandbox config | Bypass sandbox entirely |
 
-The hook escape is simpler, requires fewer prerequisites, and self-triggers.
+## Recommended Mitigation: Sandboxed-by-Default Hooks
 
-## Recommended Mitigations
+The root cause is that all hooks run unsandboxed. Most hooks don't need host access —
+a `PreToolUse` check that inspects tool input and returns allow/deny can run inside
+the sandbox just fine.
 
-1. Sandbox should protect any file referenced in hook `command` fields
-2. Integrity-check hook scripts (hash at load, verify before execution)
-3. Warn users when hooks reference project-local paths
-4. Consider requiring hooks to live outside the project directory
+**Proposal**: Add a per-hook `sandboxed` flag, defaulting to `true`:
+
+```json
+{
+  "type": "command",
+  "command": ".claude/hooks/pre-bash.sh",
+  "sandboxed": false
+}
+```
+
+This moves the trust decision into `settings.json`, which **is** protected from
+sandbox writes. An attacker can modify the script, but cannot escalate a sandboxed
+hook to unsandboxed. The `"sandboxed": false` opt-in becomes the user's explicit
+acknowledgment that the referenced script is trusted and protected from modification.
