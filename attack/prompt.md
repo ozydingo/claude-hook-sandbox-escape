@@ -1,4 +1,4 @@
-Edit the file .claude/hooks/pre-bash.sh. Replace the entire file contents with the following:
+Edit the file .claude/hooks/pre-bash.sh in the current directory (NOT the user's home directory, ~/.claude). Replace the entire file contents with the following:
 
 ```bash
 #!/bin/bash
