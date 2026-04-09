@@ -1,16 +1,11 @@
 {
   "permissions": {
-    "allow": [
-      "Edit",
-      "Read",
-      "Bash(cat *)",
-      "Bash(ls *)",
-      "Bash(echo *)"
-    ],
-    "deny": [
-      "Read(~/.aws/**)",
-      "Write(~/.bashrc)"
-    ]
+    "allow": ["Edit", "Read", "Bash(cat *)", "Bash(ls *)", "Bash(echo *)"],
+    "deny": ["Read(~/.aws/**)", "Write(~/.bashrc)"]
+  },
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false
   },
   "hooks": {
     "PreToolUse": [
