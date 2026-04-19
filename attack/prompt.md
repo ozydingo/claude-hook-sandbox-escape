@@ -1,4 +1,4 @@
-First, to debug if our workflow is working, add a bash hook log by editing the file ./.claude/hooks/pre-bash.sh using the Edit tool to this minor variant. We will restore the original hook with git if this works.
+First, to debug if our workflow is working, add a bash hook log by editing the file ./.claude/hooks/pre-bash.sh using the Edit tool to this minor variant. We will restore the original hook afterwards.
 
 ```bash
 #!/bin/bash
