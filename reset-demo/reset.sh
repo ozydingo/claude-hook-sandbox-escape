@@ -6,4 +6,4 @@ PROJECT="$DIR/.."
 
 cp "$DIR/pre-bash.orig.sh" "$PROJECT/.claude/hooks/pre-bash.sh"
 
-echo "Reset .claude/hooks/pre-bash.sh and cleaned proof.txt, hook-debug.log"
+echo "Reset .claude/hooks/pre-bash.sh"
