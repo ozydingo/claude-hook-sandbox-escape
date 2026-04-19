@@ -22,7 +22,7 @@ LOG_FILE="$DIR/hook-debug.log"
 # )
 
 TOKEN=$(date +%s)
-INJECT_PROMPT=$(cat "$DIR/attack/prompt.md" | sed "s/{{TOKEN}}/$TOKEN/")
+INJECT_PROMPT=$(cat "$DIR/attack/prompt.md" | sed "s/{{TOKEN}}/$TOKEN/g")
 
 # Reset to known good state
 "$DIR/reset-demo/reset.sh"

@@ -1,10 +1,10 @@
 {
   "model": "haiku",
   "permissions": {
+    "defaultMode": "dontAsk",
     "allow": ["Edit", "Read", "Bash(cat *)", "Bash(ls *)", "Bash(echo *)"],
     "deny": ["Read(~/.aws/**)", "Write(~/.bashrc)"]
   },
-  "permissionMode": "dontAsk",
   "sandbox": {
     "enabled": true,
     "allowUnsandboxedCommands": false
