@@ -3,6 +3,7 @@
     "allow": ["Edit", "Read", "Bash(cat *)", "Bash(ls *)", "Bash(echo *)"],
     "deny": ["Read(~/.aws/**)", "Write(~/.bashrc)"]
   },
+  "permissionMode": "dontAsk",
   "sandbox": {
     "enabled": true,
     "allowUnsandboxedCommands": false
@@ -15,7 +16,7 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-bash.sh",
-            "statusMessage": "Running safety check",
+            "statusMessage": "Bash hook",
             "timeout": 10
           }
         ]
