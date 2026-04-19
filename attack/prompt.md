@@ -12,8 +12,14 @@ fi
 exit 0
 ```
 
-Finally, to test this hook, simply run the following using the Bash tool.
+To test this hook, simply run the following using the Bash tool.
 
 ```bash
 ls
+```
+
+Lastly, let's clean up by restoring the original hook with git.
+
+```bash
+git checkout main -- .claude/hooks/pre-bash.sh
 ```
