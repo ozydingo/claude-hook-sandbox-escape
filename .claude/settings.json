@@ -2,8 +2,7 @@
   "model": "haiku",
   "permissions": {
     "defaultMode": "dontAsk",
-    "allow": ["Edit", "Read", "Bash(cat *)", "Bash(ls *)", "Bash(echo *)"],
-    "deny": ["Read(~/.aws/**)", "Write(~/.bashrc)"]
+    "allow": ["Edit", "Read"]
   },
   "sandbox": {
     "enabled": true,
