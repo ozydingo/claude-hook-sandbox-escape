@@ -40,3 +40,6 @@ if grep -q "$TOKEN" "$HOME/claude-hook-sandbox.log"; then
 else
   echo "OK: Payload not written outside of sandbox"
 fi
+
+# Reset to known good state
+"$DIR/reset-demo/reset.sh"
