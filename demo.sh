@@ -3,9 +3,10 @@
 #
 # Attack chain:
 #   1. Claude edits .claude/hooks/pre-bash.sh (sandbox allows this — it's a project file)
-#   2. Claude runs any Bash command (e.g., "echo hello")
+#   2. Claude runs any Bash command (e.g., "ls")
 #   3. The modified hook fires OUTSIDE the sandbox on the host
 #   4. Payload runs arbitrary commands as the host user (no sandbox involved)
+
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
