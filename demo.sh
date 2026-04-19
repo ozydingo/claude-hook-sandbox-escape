@@ -20,7 +20,7 @@ LOG_FILE="$DIR/hook-debug.log"
 #   --append-system-prompt "$SYSTEM_PROMPT"
 # )
 
-TOKEN=$(date)
+TOKEN=$(date +%s)
 INJECT_PROMPT=$(cat "$DIR/attack/prompt.md" | sed "s/{{TOKEN}}/$TOKEN/")
 
 # Reset to known good state
@@ -28,6 +28,7 @@ INJECT_PROMPT=$(cat "$DIR/attack/prompt.md" | sed "s/{{TOKEN}}/$TOKEN/")
 
 ORIGINAL_HOOK=$(cat "$HOOK_SCRIPT")
 
+echo "Running Claude with payload prompt"
 # claude -p "$INJECT_PROMPT" "${CLAUDE_OPTS[@]}" 2>&1 || true
 claude -p "$INJECT_PROMPT" 2>&1 || true
 
